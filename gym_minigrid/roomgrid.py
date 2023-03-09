@@ -170,6 +170,17 @@ class RoomGrid(MiniGridEnv):
         )
         self.agent_dir = 0
 
+    def colorize_room(self, i, j):
+        room = self.get_room(i, j)
+
+        top = room.top
+        size = room.size
+
+        for w in range(top[0] + 1, top[0] + size[0] - 1):
+            for h in range(top[1] + 1, top[1] + size[1] - 1):
+                obj = Floor(self._rand_color())
+                self.put_obj(obj, w, h)
+
     def place_in_room(self, i, j, obj):
         """
         Add an existing object to room (i, j)
@@ -299,7 +310,7 @@ class RoomGrid(MiniGridEnv):
         while True:
             super().place_agent(room.top, room.size, rand_dir, max_tries=1000)
             front_cell = self.grid.get(*self.front_pos)
-            if front_cell is None or front_cell.type is 'wall':
+            if front_cell is None or front_cell.type == 'wall':
                 break
 
         return self.agent_pos
