@@ -145,14 +145,11 @@ class ColorDistV1(RoomGrid):
         seed=None,
         agent_view_size=9
     ):
-        self.achievement_door = False
-        self.achievement_key = False
-
         super().__init__(
             room_size=room_size,
             num_rows=num_rows,
             num_cols=num_cols,
-            max_steps=100,
+            max_steps=200,
             seed=seed,
             agent_view_size=agent_view_size,
         )
@@ -175,6 +172,7 @@ class ColorDistV1(RoomGrid):
         self.obj.init_pos = obj_pos
         self.obj.cur_pos = obj_pos
         self.get_room(0, 0).objs.append(self.obj)
+        self.achievement_door = False
 
         # Add an unlocked door
         self.door = Door(color, is_locked=False)
@@ -187,6 +185,7 @@ class ColorDistV1(RoomGrid):
         room2 = self.get_room(0, 1)
         room2.door_pos[3] = door_pos
         room2.doors[3] = self.door
+        self.achievement_obj = False
 
         self.mission = "pick up the %s %s" % (self.obj.color, self.obj.type)
 
@@ -205,7 +204,7 @@ class ColorDistV1(RoomGrid):
                 done = True
 
         info['achievement_door'] = self.achievement_door
-        info['achievement_key'] = self.achievement_key
+        info['achievement_obj'] = self.achievement_obj
 
         return obs, reward, done, info
 
