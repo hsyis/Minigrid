@@ -100,7 +100,6 @@ parser.add_argument(
 args = parser.parse_args()
 
 env = gym.make(args.env)
-env = PositionBonus(env)
 
 if args.agent_view:
     env = RGBImgPartialObsWrapper(env)
