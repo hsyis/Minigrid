@@ -17,7 +17,11 @@ COLORS = {
     'blue'  : np.array([0, 0, 255]),
     'purple': np.array([112, 39, 195]),
     'yellow': np.array([255, 255, 0]),
-    'grey'  : np.array([100, 100, 100])
+    'grey'  : np.array([100, 100, 100]),
+    'color1': np.array([0, 255, 255]),
+    'color2': np.array([255, 0, 255]),
+    'color3': np.array([139, 69, 19]),
+    'color4': np.array([0, 128, 128])
 }
 
 COLOR_NAMES = sorted(list(COLORS.keys()))
@@ -29,7 +33,11 @@ COLOR_TO_IDX = {
     'blue'  : 2,
     'purple': 3,
     'yellow': 4,
-    'grey'  : 5
+    'grey'  : 5,
+    'color1': 6,
+    'color2': 7,
+    'color3': 8,
+    'color4': 9
 }
 
 IDX_TO_COLOR = dict(zip(COLOR_TO_IDX.values(), COLOR_TO_IDX.keys()))

@@ -285,3 +285,117 @@ register(
     id='MiniGrid-ColorDistR15-v1',
     entry_point='gym_minigrid.envs:ColorDistV1R15'
 )
+
+
+class ColorDistV2(RoomGrid):
+    """
+    One room with random distribution of colored tiles.
+    """
+
+    def __init__(
+        self,
+        room_size=11,
+        num_rows=1,
+        num_cols=1,
+        seed=None,
+        agent_view_size=5
+    ):
+        super().__init__(
+            room_size=room_size,
+            num_rows=num_rows,
+            num_cols=num_cols,
+            max_steps=200,
+            seed=seed,
+            agent_view_size=agent_view_size,
+        )
+
+    def _gen_grid(self, width, height):
+        super()._gen_grid(width, height)
+
+        # Place the agent in the middle
+        self.place_agent(0, 0)
+
+        # Colorize the room
+        self.colorize_room(0, 0)
+
+        self.achievement_door = False
+        self.achievement_obj = False
+        self.mission = "explore a map"
+
+class ColorDistV2R5(ColorDistV2):
+    def __init__(self, seed=None):
+        super().__init__(
+            room_size=5,
+            agent_view_size=5,
+            seed=seed,
+        )
+
+class ColorDistV2R7(ColorDistV2):
+    def __init__(self, seed=None):
+        super().__init__(
+            room_size=7,
+            agent_view_size=5,
+            seed=seed,
+        )
+
+class ColorDistV2R9(ColorDistV2):
+    def __init__(self, seed=None):
+        super().__init__(
+            room_size=9,
+            agent_view_size=5,
+            seed=seed,
+        )
+
+class ColorDistV2R11(ColorDistV2):
+    def __init__(self, seed=None):
+        super().__init__(
+            room_size=11,
+            agent_view_size=5,
+            seed=seed,
+        )
+
+class ColorDistV2R13(ColorDistV2):
+    def __init__(self, seed=None):
+        super().__init__(
+            room_size=13,
+            agent_view_size=5,
+            seed=seed,
+        )
+
+class ColorDistV2R15(ColorDistV2):
+    def __init__(self, seed=None):
+        super().__init__(
+            room_size=15,
+            agent_view_size=5,
+            seed=seed,
+        )
+
+register(
+    id='MiniGrid-ColorDistR5-v2',
+    entry_point='gym_minigrid.envs:ColorDistV2R5'
+)
+
+register(
+    id='MiniGrid-ColorDistR7-v2',
+    entry_point='gym_minigrid.envs:ColorDistV2R7'
+)
+
+register(
+    id='MiniGrid-ColorDistR9-v2',
+    entry_point='gym_minigrid.envs:ColorDistV2R9'
+)
+
+register(
+    id='MiniGrid-ColorDistR11-v2',
+    entry_point='gym_minigrid.envs:ColorDistV2R11'
+)
+
+register(
+    id='MiniGrid-ColorDistR13-v2',
+    entry_point='gym_minigrid.envs:ColorDistV2R13'
+)
+
+register(
+    id='MiniGrid-ColorDistR15-v2',
+    entry_point='gym_minigrid.envs:ColorDistV2R15'
+)
