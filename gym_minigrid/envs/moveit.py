@@ -12,7 +12,7 @@ class MoveItEnv(MiniGridEnv):
         size=11,
         agent_start_pos=None,
         agent_start_dir=None,
-        n_obstacles=8,
+        n_obstacles=16,
         n_colors=4,
         max_steps=200,
         agent_view_size=5,
@@ -64,8 +64,8 @@ class MoveItEnv(MiniGridEnv):
         self.obstacles = []
         self.movings = []
 
-        p_top = tuple(map(add, self.agent_pos, (-1, -1)))
-        p_size = (3, 3)
+        p_top = (2, 2)
+        p_size = (self.grid.width - 4, self.grid.height - 4)
         for i_obst in range(self.n_obstacles):
             cnum = self._rand_int(0, len(colors))
             self.obstacles.append(Ball(colors[cnum]))
