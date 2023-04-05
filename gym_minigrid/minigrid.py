@@ -47,6 +47,7 @@ OBJECT_TO_IDX = {
     'goal'          : 8,
     'lava'          : 9,
     'agent'         : 10,
+    'crosswalk'     : 11,
 }
 
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
@@ -142,6 +143,8 @@ class WorldObj:
             v = Goal()
         elif obj_type == 'lava':
             v = Lava()
+        elif obj_type == 'crosswalk':
+            v = CrossWalk()
         else:
             assert False, "unknown object type in decode '%s'" % obj_type
 
@@ -199,6 +202,22 @@ class Lava(WorldObj):
             fill_coords(img, point_in_line(0.3, yhi, 0.5, ylo, r=0.03), (0,0,0))
             fill_coords(img, point_in_line(0.5, ylo, 0.7, yhi, r=0.03), (0,0,0))
             fill_coords(img, point_in_line(0.7, yhi, 0.9, ylo, r=0.03), (0,0,0))
+
+class CrossWalk(WorldObj):
+    def __init__(self):
+        super().__init__('crosswalk', 'grey')
+
+    def can_overlap(self):
+        return True
+
+    def render(self, img):
+        color = (255, 255, 255)
+
+        fill_coords(img, point_in_rect(0, 1, 0, 1), color)
+
+        for i in range(5):
+            y = 0.1 + 0.2 * i
+            fill_coords(img, point_in_line(0.1, y, 0.9, y, r=0.05), (0,0,0))
 
 class Wall(WorldObj):
     def __init__(self, color='grey'):
@@ -769,6 +788,7 @@ class MiniGridEnv(gym.Env):
             'box'           : 'B',
             'goal'          : 'G',
             'lava'          : 'V',
+            'crosswalk'     : 'C',
         }
 
         # Short string for opened door
