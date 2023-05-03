@@ -425,18 +425,17 @@ class ColorDistV3(RoomGrid):
     def _gen_grid(self, width, height):
         super()._gen_grid(width, height)
 
-        self.colorize_room_with_target("green")
+        self.target_color = "green"
+        self.mission = f"visit {self.target_color} tile"
+        self.visited_target = []
+
+        self.target_count = 0
+        self.colorize_room()
 
         self.achievement_door = False
         self.achievement_obj = False
 
-        self.visited_target = []
-
-    def colorize_room_with_target(self, target_color):
-        self.target_count = 0
-        self.target_color = target_color
-        self.mission = f"visit {self.target_color} tile"
-
+    def colorize_room(self):
         room = self.get_room(0, 0)
 
         top = room.top
@@ -453,6 +452,9 @@ class ColorDistV3(RoomGrid):
 
                 if obj.color == self.target_color:
                     self.target_count += 1
+
+        if self.grid.get(*self.agent_pos).color == self.target_color:
+            self.visited_target.append(tuple(self.agent_pos))
 
     def step(self, action):
         prev_front_cell = self.grid.get(*self.front_pos)
