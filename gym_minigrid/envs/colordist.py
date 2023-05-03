@@ -1,6 +1,6 @@
 from gym_minigrid.roomgrid import RoomGrid
 from gym_minigrid.register import register
-from gym_minigrid.minigrid import Door, Key
+from gym_minigrid.minigrid import Door, Key, Floor
 import numpy as np
 
 class ColorDistV0(RoomGrid):
@@ -398,4 +398,98 @@ register(
 register(
     id='MiniGrid-ColorDistR15-v2',
     entry_point='gym_minigrid.envs:ColorDistV2R15'
+)
+
+class ColorDistV3(RoomGrid):
+    """
+    One room with random distribution of colored tiles.
+    """
+
+    def __init__(
+        self,
+        room_size=11,
+        num_rows=1,
+        num_cols=1,
+        seed=None,
+        agent_view_size=5
+    ):
+        super().__init__(
+            room_size=room_size,
+            num_rows=num_rows,
+            num_cols=num_cols,
+            max_steps=200,
+            seed=seed,
+            agent_view_size=agent_view_size,
+        )
+
+    def _gen_grid(self, width, height):
+        super()._gen_grid(width, height)
+
+        self.colorize_room_with_target("green")
+
+        self.achievement_door = False
+        self.achievement_obj = False
+
+        self.visited_target = []
+
+    def colorize_room_with_target(self, target_color):
+        self.target_count = 0
+        self.target_color = target_color
+        self.mission = f"visit {self.target_color} tile"
+
+        room = self.get_room(0, 0)
+
+        top = room.top
+        size = room.size
+
+        for w in range(top[0] + 1, top[0] + size[0] - 1):
+            for h in range(top[1] + 1, top[1] + size[1] - 1):
+                color = self.target_color
+                if self._rand_float(0, 1.0) > 0.1:
+                    color = self._rand_color()
+
+                obj = Floor(color)
+                self.put_obj(obj, w, h)
+
+                if obj.color == self.target_color:
+                    self.target_count += 1
+
+    def step(self, action):
+        prev_front_cell = self.grid.get(*self.front_pos)
+
+        obs, reward, done, info = super().step(action)
+
+        if prev_front_cell.type == 'wall' and action == self.actions.forward:
+            # done with negative reward
+            reward = -1.0
+            done = True
+        else:
+            visit_cell = self.grid.get(*self.agent_pos)
+            if visit_cell.color == self.target_color:
+                pos = tuple(self.agent_pos)
+                if pos not in self.visited_target:
+                    # reset if all targets are visited
+                    if len(self.visited_target) + 1 == self.target_count:
+                        self.visited_target = []
+
+                    # get positive reward
+                    self.visited_target.append(pos)
+                    self.achievement_obj += 1
+                    reward = 0.1
+
+        info['achievement_obj'] = self.achievement_obj
+
+        return obs, reward, done, info
+
+class ColorDistV3R11(ColorDistV3):
+    def __init__(self, seed=None):
+        super().__init__(
+            room_size=11,
+            agent_view_size=5,
+            seed=seed,
+        )
+
+register(
+    id='MiniGrid-ColorDistR11-v3',
+    entry_point='gym_minigrid.envs:ColorDistV3R11'
 )
