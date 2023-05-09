@@ -447,6 +447,7 @@ class Grid:
         cls,
         obj,
         agent_dir=None,
+        agent_life=1.0,
         highlight=False,
         tile_size=TILE_PIXELS,
         subdivs=3
@@ -456,7 +457,7 @@ class Grid:
         """
 
         # Hash map lookup key for the cache
-        key = (agent_dir, highlight, tile_size)
+        key = (agent_dir, agent_life, highlight, tile_size)
         key = obj.encode() + key if obj else key
 
         if key in cls.tile_cache:
@@ -481,7 +482,11 @@ class Grid:
 
             # Rotate the agent based on its direction
             tri_fn = rotate_fn(tri_fn, cx=0.5, cy=0.5, theta=0.5*math.pi*agent_dir)
-            fill_coords(img, tri_fn, (255, 0, 0))
+            fill_coords(img, tri_fn, (255, 0, 0)) # red
+
+        if agent_life < 1.0:
+            lowlight_img = img * math.sqrt(agent_life)
+            img[:, :, :] = lowlight_img
 
         # Highlight the cell if needed
         if highlight:
@@ -500,6 +505,7 @@ class Grid:
         tile_size,
         agent_pos=None,
         agent_dir=None,
+        agent_life=1.0,
         highlight_mask=None
     ):
         """
@@ -526,6 +532,7 @@ class Grid:
                 tile_img = Grid.render_tile(
                     cell,
                     agent_dir=agent_dir if agent_here else None,
+                    agent_life=agent_life,
                     highlight=highlight_mask[i, j],
                     tile_size=tile_size
                 )
@@ -758,6 +765,8 @@ class MiniGridEnv(gym.Env):
         # Current position and direction of the agent
         self.agent_pos = None
         self.agent_dir = None
+        self.agent_life = 0.0
+        self.agent_life_max = 10.0
 
         # Initialize the RNG
         self.seed(seed=seed)
@@ -769,6 +778,7 @@ class MiniGridEnv(gym.Env):
         # Current position and direction of the agent
         self.agent_pos = None
         self.agent_dir = None
+        self.agent_life = self.agent_life_max
 
         # Generate a new random grid at the start of each episode
         # To keep the same grid for each episode, call env.seed() with
@@ -1164,6 +1174,9 @@ class MiniGridEnv(gym.Env):
         reward = 0
         done = False
 
+        self.agent_life -= 1
+        reward -= (1.0 - self.agent_life / self.agent_life_max) ** 2
+
         # Get the position in front of the agent
         fwd_pos = self.front_pos
 
@@ -1189,6 +1202,8 @@ class MiniGridEnv(gym.Env):
                 reward = self._reward()
             if fwd_cell != None and fwd_cell.type == 'lava':
                 done = True
+            if fwd_cell != None and fwd_cell.color == 'green':
+                self.agent_life = self.agent_life_max
 
         # Pick up an object
         elif action == self.actions.pickup:
@@ -1218,6 +1233,9 @@ class MiniGridEnv(gym.Env):
             assert False, "unknown action"
 
         if self.step_count >= self.max_steps:
+            done = True
+
+        if self.agent_life <= 0:
             done = True
 
         obs = self.gen_obs()
@@ -1292,6 +1310,7 @@ class MiniGridEnv(gym.Env):
             tile_size,
             agent_pos=(self.agent_view_size // 2, self.agent_view_size // 2),
             agent_dir=3,
+            agent_life=(self.agent_life / self.agent_life_max),
             highlight_mask=vis_mask
         )
 
@@ -1347,6 +1366,7 @@ class MiniGridEnv(gym.Env):
             tile_size,
             self.agent_pos,
             self.agent_dir,
+            agent_life=(self.agent_life / self.agent_life_max),
             highlight_mask=highlight_mask if highlight else None
         )
 
