@@ -1,6 +1,6 @@
 from gym_minigrid.roomgrid import RoomGrid
 from gym_minigrid.register import register
-from gym_minigrid.minigrid import Door, Key, Floor
+from gym_minigrid.minigrid import Door, Key, Floor, spaces
 import numpy as np
 
 class ColorDistV0(RoomGrid):
@@ -422,14 +422,15 @@ class ColorDistV3(RoomGrid):
             agent_view_size=agent_view_size,
         )
 
+        # Allow only 3 actions permitted: left, right, forward
+        self.action_space = spaces.Discrete(self.actions.forward + 1)
+
     def _gen_grid(self, width, height):
         super()._gen_grid(width, height)
 
         self.target_color = "green"
         self.mission = f"visit {self.target_color} tile"
-        self.visited_target = []
 
-        self.target_count = 0
         self.colorize_room()
 
         self.achievement_door = False
@@ -443,41 +444,17 @@ class ColorDistV3(RoomGrid):
 
         for w in range(top[0] + 1, top[0] + size[0] - 1):
             for h in range(top[1] + 1, top[1] + size[1] - 1):
-                color = self.target_color
-                if self._rand_float(0, 1.0) > 0.1:
-                    color = self._rand_color()
-
-                obj = Floor(color)
+                obj = Floor(self._rand_color())
                 self.put_obj(obj, w, h)
 
-                if obj.color == self.target_color:
-                    self.target_count += 1
-
-        if self.grid.get(*self.agent_pos).color == self.target_color:
-            self.visited_target.append(tuple(self.agent_pos))
-
     def step(self, action):
-        prev_front_cell = self.grid.get(*self.front_pos)
-
         obs, reward, done, info = super().step(action)
 
-        if prev_front_cell.type == 'wall' and action == self.actions.forward:
-            # done with negative reward
-            reward = -1.0
-            done = True
-        else:
-            visit_cell = self.grid.get(*self.agent_pos)
-            if visit_cell.color == self.target_color:
-                pos = tuple(self.agent_pos)
-                if pos not in self.visited_target:
-                    # reset if all targets are visited
-                    if len(self.visited_target) + 1 == self.target_count:
-                        self.visited_target = []
-
-                    # get positive reward
-                    self.visited_target.append(pos)
-                    self.achievement_obj += 1
-                    reward = 0.1
+        visit_cell = self.grid.get(*self.agent_pos)
+        if visit_cell.color == self.target_color:
+            if action == self.actions.forward:
+                self.achievement_obj += 1
+                reward = 1
 
         info['achievement_obj'] = self.achievement_obj
 
